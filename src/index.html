@@ -1,0 +1,67 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="mobile-web-app-capable" content="yes">
+
+		<title>Catan Random Map Generator</title>
+
+		<script src="./js/sprite.js"></script>
+		<script src="./js/index.js"></script>
+		<script src="./js/map.js"></script>
+
+		<style>
+			canvas
+			{
+				display: block;
+				position: absolute;
+				margin: auto;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+			}
+		</style>
+	</head>
+	<body>
+
+	</body>
+	<script>
+		var controlCanvas, mapCanvas, ctx;
+
+		mapCanvas = document.createElement("canvas");
+
+		width = window.innerWidth;
+		height = window.innerHeight;
+
+		// if(height > width)
+		// {
+		// 	height /= 2;
+		// }
+		// else
+		// {
+		// 	width /= 2;
+		// }
+
+		mapCanvas.width = width;
+		mapCanvas.height = height;
+		ctx = mapCanvas.getContext("2d");
+
+		document.body.appendChild(mapCanvas);
+
+		var img = new Image();
+		img.onload = function()
+		{
+			initSprites(this);
+			run();
+		}
+		img.src = "../res/sheet.png";
+
+		function run()
+		{
+			initialise(ctx);
+		}
+	</script>
+</html>
