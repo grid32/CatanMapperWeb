@@ -26,33 +26,33 @@
 		</style>
 	</head>
 	<body>
-
+		<span>Height: </span> <span id = "height">5</span>
+		<br>
+		<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)"/>
+		<br>
+		<br>
+		<span>Width: </span> <span id = "width">5</span>
+		<br>
+		<input type = "range" min = "1" max = "11" value = "5" step = "1" onchange="setWidth(this.value)"/>
+		<canvas id = "right"></canvas>
 	</body>
 	<script>
-		var mapCanvas, scaledMap, ctx;
-
-		mapCanvas = document.createElement("canvas");
-		scaledMap = document.createElement("canvas");
-
-		width = window.innerWidth;
-		height = window.innerHeight;
-
-		if(height > width)
+		var mapHeight = 5;
+		var mapWidth = 5;
+		function setHeight(inHeight)
 		{
-			height /= 2;
-			scaledMap.style.top = height + "px";
-			scaledMap.style.left = "10px";
+			inHeight = Math.floor(inHeight);
+			mapHeight = inHeight;
+			document.getElementById("height").innerHTML = inHeight;
+			update(mapWidth, mapHeight)
 		}
-		else
+		function setWidth(inWidth)
 		{
-			width /= 2;
-			scaledMap.style.left = width + "px";
-			scaledMap.style.top = "10px";
+			inWidth = Math.floor(inWidth);
+			mapWidth = inWidth;
+			document.getElementById("width").innerHTML = inWidth;
+			update(mapWidth, mapHeight)
 		}
-
-		ctx = mapCanvas.getContext("2d");
-
-		document.body.appendChild(scaledMap);
 
 		var img = new Image();
 		img.onload = function()
@@ -65,28 +65,60 @@
 
 		function run()
 		{
-			var mapWidth = 5,
-				mapHeight = 5;
-			update(mapCanvas, scaledMap, width, height, mapWidth, mapHeight);	
+			update(5, 5);
+			window.addEventListener("resize", resize, false);
 		}
 
-		function render(mapCanvas, scaledMap, width, height, mapWidth, mapHeight)
+		function resize()
 		{
-			
+			update(mapWidth, mapHeight);
+		}
+
+		function render(mapCanvas, scaledMapCanvas, width, height, mapWidth, mapHeight)
+		{
 			mapCanvas.width = s_desert.width * mapWidth;
 			mapCanvas.height = ((s_desert.height - (0.246 * s_desert.height)) * (mapHeight - 1)) + s_desert.height;
-			drawMap(mapHeight, mapWidth);
 
-			var scaledCtx = scaledMap.getContext("2d");
-			scaledMap.width = width - 20;
-			scaledMap.height = height - 20;
+			var ctx = mapCanvas.getContext("2d");
+			drawMap(ctx, mapWidth, mapHeight);
+
+			var scaledCtx = scaledMapCanvas.getContext("2d");
+			scaledMapCanvas.width = width - 20;
+			scaledMapCanvas.height = height - 20;
 			scaledCtx.drawImage(mapCanvas, 	0, 0, mapCanvas.width, mapCanvas.height, 
-											0, 0, scaledMap.width, scaledMap.height);
+											0, 0, scaledMapCanvas.width, scaledMapCanvas.height);
 		}
 
-		function update(mapCanvas, scaledMap, width, height, mapWidth, mapHeight)
+		function update(mapWidth, mapHeight)
 		{
-			render(mapCanvas, scaledMap, width, height, mapWidth, mapHeight);
+			var mapCanvas, scaledMapCanvas;
+
+			mapCanvas = document.createElement("canvas");
+			scaledMapCanvas = document.getElementById("right");
+
+			//Get window size.
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+
+			//Make scaledMapCanvas fill bottom or right half of the window.
+			if(height > width)
+			{
+				height /= 2;
+				scaledMapCanvas.style.top = height + "px";
+				scaledMapCanvas.style.left = "10px";
+			}
+			else
+			{
+				width /= 2;
+				scaledMapCanvas.style.left = width + "px";
+				scaledMapCanvas.style.top = "10px";
+			}
+
+			//document.body.innerHTML = ""; //Clear body.
+			
+
+			//Redraw map.
+			render(mapCanvas, scaledMapCanvas, width, height, mapWidth, mapHeight);
 		}
 	</script>
 </html>

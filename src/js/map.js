@@ -54,12 +54,13 @@ HexRow.prototype.toString = function(width)
 //////////////////////////////////////////////////////////
 // Map 													//
 //////////////////////////////////////////////////////////
-function Map(height, width)
+function Map(width, height)
 {
 	this.height = height;
 	this.width = width;
 
 	this.rows = [];
+
 	var change = (height - 3) / 2;
 	for(var i = 0; i < height; i++)
 	{
