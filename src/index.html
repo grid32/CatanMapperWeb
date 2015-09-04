@@ -29,27 +29,30 @@
 
 	</body>
 	<script>
-		var controlCanvas, mapCanvas, ctx;
+		var mapCanvas, scaledMap, ctx;
 
 		mapCanvas = document.createElement("canvas");
+		scaledMap = document.createElement("canvas");
 
 		width = window.innerWidth;
 		height = window.innerHeight;
 
-		// if(height > width)
-		// {
-		// 	height /= 2;
-		// }
-		// else
-		// {
-		// 	width /= 2;
-		// }
+		if(height > width)
+		{
+			height /= 2;
+			scaledMap.style.top = height + "px";
+			scaledMap.style.left = "10px";
+		}
+		else
+		{
+			width /= 2;
+			scaledMap.style.left = width + "px";
+			scaledMap.style.top = "10px";
+		}
 
-		mapCanvas.width = width;
-		mapCanvas.height = height;
 		ctx = mapCanvas.getContext("2d");
 
-		document.body.appendChild(mapCanvas);
+		document.body.appendChild(scaledMap);
 
 		var img = new Image();
 		img.onload = function()
@@ -57,11 +60,33 @@
 			initSprites(this);
 			run();
 		}
+
 		img.src = "../res/sheet.png";
 
 		function run()
 		{
-			initialise(ctx);
+			var mapWidth = 5,
+				mapHeight = 5;
+			update(mapCanvas, scaledMap, width, height, mapWidth, mapHeight);	
+		}
+
+		function render(mapCanvas, scaledMap, width, height, mapWidth, mapHeight)
+		{
+			
+			mapCanvas.width = s_desert.width * mapWidth;
+			mapCanvas.height = ((s_desert.height - (0.246 * s_desert.height)) * (mapHeight - 1)) + s_desert.height;
+			drawMap(mapHeight, mapWidth);
+
+			var scaledCtx = scaledMap.getContext("2d");
+			scaledMap.width = width - 20;
+			scaledMap.height = height - 20;
+			scaledCtx.drawImage(mapCanvas, 	0, 0, mapCanvas.width, mapCanvas.height, 
+											0, 0, scaledMap.width, scaledMap.height);
+		}
+
+		function update(mapCanvas, scaledMap, width, height, mapWidth, mapHeight)
+		{
+			render(mapCanvas, scaledMap, width, height, mapWidth, mapHeight);
 		}
 	</script>
 </html>
