@@ -77,6 +77,21 @@ function Map(width, height)
 		newRow.setY = i;
 		this.rows.push(newRow);
 	}
+
+	this.typeCount = 
+	{
+		0: 0,
+		1: 4,
+		2: 3,
+		3: 3,
+		4: 4,
+		5: 4,
+		6: 0,
+		7: 0,
+		8: 0,
+		9: 0,
+		10: 0
+	}
 }
 
 Map.prototype.toString = function()

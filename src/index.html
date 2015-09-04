@@ -26,19 +26,76 @@
 		</style>
 	</head>
 	<body>
-		<span>Height: </span> <span id = "height">5</span>
+		<input type = "checkbox" name = "sizeChk" onclick = "showMe('size', this.checked)">Use custom size
 		<br>
-		<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)"/>
+		<div id = "sizeDiv" style = "display:none; width:25%; height:120px; border:1px solid black;">
+			<span>Height: </span> <span id = "height">5</span>
+			<br>
+			<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)"/>
+			<br>
+			<br>
+			<span>Width: </span> <span id = "width">5</span>
+			<br>
+			<input type = "range" min = "1" max = "11" value = "5" step = "1" onchange="setWidth(this.value)"/>
+		</div>
 		<br>
+
+		<input type = "checkbox" name = "desertChk" onclick = "showMe('desert', this.checked)">Use desert hexes
 		<br>
-		<span>Width: </span> <span id = "width">5</span>
+		<div id = "desertDiv" style = "display:none; width:25%; height:60px; border:1px solid black;">
+			<span>Deserts: </span> <span id = "desert">0</span>
+			<br>
+			<input id = "desertSld" type = "range" min = 1 max = 0 value = 0 step = "1" onchange="setDesertCount(this.value)"/>
+		</div>
 		<br>
-		<input type = "range" min = "1" max = "11" value = "5" step = "1" onchange="setWidth(this.value)"/>
+
+		<div>
+			<!-- TODO: Finish interface. -->
+		</div>
+
 		<canvas id = "right"></canvas>
 	</body>
 	<script>
 		var mapHeight = 5;
 		var mapWidth = 5;
+		var desertMax = 1;
+		var desertCount = 0;
+
+		document.getElementById("desertSld").max = desertMax;
+		document.getElementById("desertSld").value = 1;
+		document.getElementById("desert").innerHTML = 1;
+
+		function showMe(section, checked)
+		{
+			if(section == "size")
+			{
+				if(checked == false)
+				{
+					document.getElementById("sizeDiv").style.display = "none";
+					defaultMapSize();
+				}
+				else
+				{
+					document.getElementById("sizeDiv").style.display = "block";
+					mapHeight = Math.floor(document.getElementById("height").innerHTML);
+					mapWidth = Math.floor(document.getElementById("width").innerHTML);
+				}
+			}
+			if(section == "desert")
+			{
+				if(checked == false)
+				{
+					document.getElementById("desertDiv").style.display = "none";
+					desertCount = 0;
+				}
+				else
+				{
+					document.getElementById("desertDiv").style.display = "block";
+					desertCount = document.getElementById("desert").innerHTML
+				}
+			}
+			update(mapWidth, mapHeight);
+		}
 		function setHeight(inHeight)
 		{
 			inHeight = Math.floor(inHeight);
@@ -52,6 +109,18 @@
 			mapWidth = inWidth;
 			document.getElementById("width").innerHTML = inWidth;
 			update(mapWidth, mapHeight)
+		}
+		function defaultMapSize()
+		{
+			mapWidth = 5;
+			mapHeight = 5;
+			//TODO: Calculate default sizes.
+		}
+		function setDesertCount(inCount)
+		{
+			desertCount = inCount;
+			document.getElementById("desert").innerHTML = inCount;
+			update(mapWidth, mapHeight);
 		}
 
 		var img = new Image();
@@ -89,6 +158,7 @@
 											0, 0, scaledMapCanvas.width, scaledMapCanvas.height);
 		}
 
+		//TODO: Set up typeCount and pass to drawMap.
 		function update(mapWidth, mapHeight)
 		{
 			var mapCanvas, scaledMapCanvas;
