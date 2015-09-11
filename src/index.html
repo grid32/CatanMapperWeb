@@ -26,102 +26,86 @@
 		</style>
 	</head>
 	<body>
-		<input type = "checkbox" name = "sizeChk" onclick = "showMe('size', this.checked)">Use custom size
+		<!-- Custom Map Size -->
+		<input type = "checkbox" id = "sizeChk" onclick = "sizeClick(this.checked)">Use Custom Size
 		<br>
 		<div id = "sizeDiv" style = "display: none; border:1px solid black;">
-			<span>Height: </span> <span id = "height">5</span>
+			<span>Height: </span> <span id = "height">5</span>/<span id = "heightMax">11</span>
 			<br>
 			<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)"/>
 			<br>
 			<br>
-			<span>Width: </span> <span id = "width">5</span>
+			<span>Width: </span> <span id = "width">5</span>/<span id = "widthMax">11</span>
 			<br>
 			<input type = "range" min = "1" max = "11" value = "5" step = "1" onchange="setWidth(this.value)"/>
 		</div>
+
 		<br>
 
-		<input type = "checkbox" name = "desertChk" onclick = "showMe('desert', this.checked)">Use desert hexes
+		<!-- Desert Hexes -->
+		<input type = "checkbox" id = "desertChk" onclick = "desertClick(this.checked)">Use Desert Hexes
 		<br>
 		<div id = "desertDiv" style = "display: none; border:1px solid black;">
-			<span>Deserts: </span> <span id = "desert">0</span>
+			<span>Deserts: </span> <span id = "desert">1</span>/<span id = "desertMax">1</span>
 			<br>
-			<input id = "desertSld" type = "range" min = 1 max = 0 value = 0 step = "1" onchange="setDesertCount(this.value)"/>
+			<input id = "desertSld" type = "range" min = 1 max = 1 value = 1 step = "1" onchange="updateDesertSld()"/>
 		</div>
+
 		<br>
 
-		<div>
-			<!-- TODO: Finish interface. -->
+		<!-- Gold Hexes -->
+		<input type = "checkbox" id = "goldChk" onclick = "goldClick(this.checked)">Use Gold Hexes
+		<br>
+		<div id = "goldDiv" style = "display: none; border:1px solid black;">
+			<span>Gold: </span> <span id = "gold">0</span>/<span id = "goldMax">0</span>
+			<br>
+			<input id = "goldSld" type = "range" min = 0 max = 0 value = 0 step = "1" onchange="updateGoldSld()"/>
+		</div>
+
+		<br>
+
+		<!-- Use 5-6 Player Expansion -->
+		<input type = "checkbox" id = "playerChk" onclick = "playersClick(this.checked)">5-6 Player
+		<br>
+
+		<br>
+
+		<!-- Use Seafarers Expansion -->
+		<input type = "checkbox" id = "seaChk" onclick = "seaClick(this.checked)">Use Seafarers
+		<br>
+		<div id = "seaDiv" style = "display: none; border:1px solid black;">
+			<span>Sea: </span> <span id = "sea">1</span>/<span id = "seaMax">19</span>
+			<br>
+			<input id = "seaSld" type = "range" min = 1 max = 19 value = 1 step = "1" onchange="updateSeaSld()"/>
+		</div>
+
+		<br>
+
+		<!-- Use Explorers and Pirates Expansion -->
+		<input type = "checkbox" id = "explorersChk" onclick = "explorersClick(this.checked)">Use Explorers and Pirates
+		<br>
+		<div id = "explorersDiv" style = "display: none; border:1px solid black;">
+			<span>Moons: </span> <span id = "moons">1</span>/<span id = "moonMax">15</span>
+			<br>
+			<input id = "moonSld" type = "range" min = 1 max = 15 value = 1 step = "1" onchange="updateSunMoonSld()"/>
+
+			<br>
+
+			<span>Suns: </span> <span id = "suns">1</span>/<span id = "sunMax">15</span>
+			<br>
+			<input id = "sunSld" type = "range" min = 1 max = 15 value = 1 step = "1" onchange="updateSunMoonSld()"/>
 		</div>
 
 		<canvas id = "right"></canvas>
 	</body>
 	<script>
-		var mapHeight = 5;
-		var mapWidth = 5;
-		var desertMax = 1;
-		var desertCount = 0;
-
-		document.getElementById("desertSld").max = desertMax;
-		document.getElementById("desertSld").value = 1;
-		document.getElementById("desert").innerHTML = 1;
-
-		function showMe(section, checked)
-		{
-			if(section == "size")
-			{
-				if(checked == false)
-				{
-					document.getElementById("sizeDiv").style.display = "none";
-					defaultMapSize();
-				}
-				else
-				{
-					document.getElementById("sizeDiv").style.display = "inline-block";
-					mapHeight = Math.floor(document.getElementById("height").innerHTML);
-					mapWidth = Math.floor(document.getElementById("width").innerHTML);
-				}
-			}
-			if(section == "desert")
-			{
-				if(checked == false)
-				{
-					document.getElementById("desertDiv").style.display = "none";
-					desertCount = 0;
-				}
-				else
-				{
-					document.getElementById("desertDiv").style.display = "inline-block";
-					desertCount = document.getElementById("desert").innerHTML
-				}
-			}
-			update(mapWidth, mapHeight);
-		}
-		function setHeight(inHeight)
-		{
-			inHeight = Math.floor(inHeight);
-			mapHeight = inHeight;
-			document.getElementById("height").innerHTML = inHeight;
-			update(mapWidth, mapHeight)
-		}
-		function setWidth(inWidth)
-		{
-			inWidth = Math.floor(inWidth);
-			mapWidth = inWidth;
-			document.getElementById("width").innerHTML = inWidth;
-			update(mapWidth, mapHeight)
-		}
-		function defaultMapSize()
-		{
+		var mapHeight = 5,
 			mapWidth = 5;
-			mapHeight = 5;
-			//TODO: Calculate default sizes.
-		}
-		function setDesertCount(inCount)
-		{
-			desertCount = inCount;
-			document.getElementById("desert").innerHTML = inCount;
-			update(mapWidth, mapHeight);
-		}
+		var desertCount = 0;
+		var goldCount = 0;
+		var seaCount = 1;
+		var moonCount = 1,
+			sunCount = 1;
 
 		var img = new Image();
 		img.onload = function()
@@ -131,86 +115,5 @@
 		}
 
 		img.src = "../res/sheet.png";
-
-		function run()
-		{
-			update(5, 5);
-			window.addEventListener("resize", resize, false);
-		}
-
-		function resize()
-		{
-			update(mapWidth, mapHeight);
-		}
-
-		function render(mapCanvas, scaledMapCanvas, windowWidth, windowHeight, mapWidth, mapHeight)
-		{
-			var heightMod = mapHeight/mapWidth, widthMod = mapWidth/mapHeight;
-
-			//Resize canvas based on window size.
-			if(windowWidth < windowHeight)
-			{
-				windowHeight = windowWidth;
-			}
-			else
-			{
-				windowWidth = windowHeight;
-			}
-
-			//Resize canvas to correct shape
-			if(mapWidth > mapHeight)
-			{
-				windowHeight /= widthMod;
-			}
-			else
-			{
-				windowWidth /= heightMod;
-			}
-
-			mapCanvas.width = s_desert.width * mapWidth;
-			mapCanvas.height = ((s_desert.height - (0.246 * s_desert.height)) * (mapHeight - 1)) + s_desert.height;
-
-			var ctx = mapCanvas.getContext("2d");
-			drawMap(ctx, mapWidth, mapHeight);
-
-			var scaledCtx = scaledMapCanvas.getContext("2d");
-			scaledMapCanvas.width = windowWidth - 20;
-			scaledMapCanvas.height = windowHeight - 20;
-			scaledCtx.drawImage(mapCanvas, 	0, 0, mapCanvas.width, mapCanvas.height, 
-											0, 0, scaledMapCanvas.width, scaledMapCanvas.height);
-		}
-
-		//TODO: Set up typeCount and pass to drawMap.
-		function update(mapWidth, mapHeight)
-		{
-			var mapCanvas, scaledMapCanvas;
-
-			mapCanvas = document.createElement("canvas");
-			scaledMapCanvas = document.getElementById("right");
-
-			//Get window size.
-			var width = window.innerWidth;
-			var height = window.innerHeight;
-
-			//Make scaledMapCanvas fill bottom or right half of the window.
-			if(height > width)
-			{
-				height /= 2;
-				scaledMapCanvas.style.top = height + "px";
-				scaledMapCanvas.style.left = "10px";
-			}
-			else
-			{
-				width /= 2;
-				scaledMapCanvas.style.left = width + "px";
-				scaledMapCanvas.style.top = "10px";
-			}
-
-			//document.body.innerHTML = ""; //Clear body.
-			
-
-			//Redraw map.
-			render(mapCanvas, scaledMapCanvas, width, height, mapWidth, mapHeight);
-		}
 	</script>
 </html>
