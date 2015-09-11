@@ -28,7 +28,7 @@
 	<body>
 		<input type = "checkbox" name = "sizeChk" onclick = "showMe('size', this.checked)">Use custom size
 		<br>
-		<div id = "sizeDiv" style = "display:none; width:25%; height:120px; border:1px solid black;">
+		<div id = "sizeDiv" style = "display: none; border:1px solid black;">
 			<span>Height: </span> <span id = "height">5</span>
 			<br>
 			<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)"/>
@@ -42,7 +42,7 @@
 
 		<input type = "checkbox" name = "desertChk" onclick = "showMe('desert', this.checked)">Use desert hexes
 		<br>
-		<div id = "desertDiv" style = "display:none; width:25%; height:60px; border:1px solid black;">
+		<div id = "desertDiv" style = "display: none; border:1px solid black;">
 			<span>Deserts: </span> <span id = "desert">0</span>
 			<br>
 			<input id = "desertSld" type = "range" min = 1 max = 0 value = 0 step = "1" onchange="setDesertCount(this.value)"/>
@@ -76,7 +76,7 @@
 				}
 				else
 				{
-					document.getElementById("sizeDiv").style.display = "block";
+					document.getElementById("sizeDiv").style.display = "inline-block";
 					mapHeight = Math.floor(document.getElementById("height").innerHTML);
 					mapWidth = Math.floor(document.getElementById("width").innerHTML);
 				}
@@ -90,7 +90,7 @@
 				}
 				else
 				{
-					document.getElementById("desertDiv").style.display = "block";
+					document.getElementById("desertDiv").style.display = "inline-block";
 					desertCount = document.getElementById("desert").innerHTML
 				}
 			}
@@ -143,8 +143,30 @@
 			update(mapWidth, mapHeight);
 		}
 
-		function render(mapCanvas, scaledMapCanvas, width, height, mapWidth, mapHeight)
+		function render(mapCanvas, scaledMapCanvas, windowWidth, windowHeight, mapWidth, mapHeight)
 		{
+			var heightMod = mapHeight/mapWidth, widthMod = mapWidth/mapHeight;
+
+			//Resize canvas based on window size.
+			if(windowWidth < windowHeight)
+			{
+				windowHeight = windowWidth;
+			}
+			else
+			{
+				windowWidth = windowHeight;
+			}
+
+			//Resize canvas to correct shape
+			if(mapWidth > mapHeight)
+			{
+				windowHeight /= widthMod;
+			}
+			else
+			{
+				windowWidth /= heightMod;
+			}
+
 			mapCanvas.width = s_desert.width * mapWidth;
 			mapCanvas.height = ((s_desert.height - (0.246 * s_desert.height)) * (mapHeight - 1)) + s_desert.height;
 
@@ -152,8 +174,8 @@
 			drawMap(ctx, mapWidth, mapHeight);
 
 			var scaledCtx = scaledMapCanvas.getContext("2d");
-			scaledMapCanvas.width = width - 20;
-			scaledMapCanvas.height = height - 20;
+			scaledMapCanvas.width = windowWidth - 20;
+			scaledMapCanvas.height = windowHeight - 20;
 			scaledCtx.drawImage(mapCanvas, 	0, 0, mapCanvas.width, mapCanvas.height, 
 											0, 0, scaledMapCanvas.width, scaledMapCanvas.height);
 		}
