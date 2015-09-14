@@ -4,12 +4,28 @@ var map = null,
 //Creates a new map.
 function drawMap(ctx, width, height)
 {
-	if(map == null || map.height != height || map.width != width)
+	if(map == null || map.height != height || map.width != width || !compareTypeCounts())
 	{
-		map = new Map(width, height);
+		map = new Map(width, height, typeCount);
 		map.randomiseResources();
 	}
 	map.draw(ctx);
+}
+
+function compareTypeCounts()
+{
+	var newType = typeCount,
+		oldType = map.typeCount;
+	var keys = Object.keys(newType);
+	var out = true;
+	for(var i = 0; i < keys.length; i++)
+	{
+		if(newType[keys[i]] != oldType[keys[i]])
+		{
+			out = false;
+		}
+	}
+	return out;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -19,36 +35,34 @@ function sizeClick(value)
 {
 	showMe("size", value);
 	setMapSize();
+	update();
 }
 function desertClick(value)
 {
 	showMe("desert", value);
+	update();
 }
 function goldClick(value)
 {
 	showMe("gold", value);
+	update();
 }
 function playersClick(value)
 {
-	updateDesertSld();
-	updateGoldSld();
-	updateSeaSld();
-	updateSunMoonSld();
-
 	setMapSize();
+	update();
 }
 function seaClick(value)
 {
-	updateDesertSld();
-	updateGoldSld();
-
 	setMapSize();
 	showMe("sea", value);
+	update();
 }
 function explorersClick(value)
 {
 	setMapSize();
 	showMe("explorers", value);
+	update();
 }
 
 //Show/Hide divs
@@ -62,8 +76,6 @@ function showMe(section, checked)
 	{
 		document.getElementById(section + "Div").style.display = "none";
 	}
-
-	update();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -153,19 +165,42 @@ function updateSunMoonSld()
 	document.getElementById("sunMax").innerHTML = sunSld.max;
 }
 
+
+//TODO: Check tileCount to maxTileCount.
 function setHeight(inHeight)
 {
-	inHeight = Math.floor(inHeight);
-	mapHeight = inHeight;
-	document.getElementById("height").innerHTML = inHeight;
-	update()
+	if(Math.floor(document.getElementById("width").innerHTML) - (inHeight - 1)/2 < 1)
+	{
+		window.alert("Height is too large for width.");
+		document.getElementById("heightSld").value -= 2;
+		inHeight  -= 2;
+		// Super hacky way to deselect.
+		document.getElementById("sizeChk").click();
+		document.getElementById("sizeChk").click();
+	}
+		inHeight = Math.floor(inHeight);
+		mapHeight = inHeight;
+		document.getElementById("height").innerHTML = inHeight;
+		update()
+	
 }
 function setWidth(inWidth)
 {
-	inWidth = Math.floor(inWidth);
-	mapWidth = inWidth;
-	document.getElementById("width").innerHTML = inWidth;
-	update()
+	if(inWidth - (Math.floor(document.getElementById("height").innerHTML) - 1)/2 < 1)
+	{
+		window.alert("Width is too small for height.");
+		document.getElementById("widthSld").value++;
+		inWidth++;
+		// Super hacky way to deselect.
+		document.getElementById("sizeChk").click();
+		document.getElementById("sizeChk").click();
+	}
+	
+		inWidth = Math.floor(inWidth);
+		mapWidth = inWidth;
+		document.getElementById("width").innerHTML = inWidth;
+		update()
+	
 }
 
 //Sets map size based on settings.
@@ -213,7 +248,6 @@ function setMapSize()
 			}
 		}
 	}
-	update();
 }
 
 function run()
@@ -264,7 +298,6 @@ function render(mapCanvas, scaledMapCanvas, windowWidth, windowHeight, mapWidth,
 									0, 0, scaledMapCanvas.width, scaledMapCanvas.height);
 }
 
-//TODO: Set up typeCount and pass to drawMap.
 function update()
 {
 	var mapCanvas, scaledMapCanvas;
@@ -275,6 +308,12 @@ function update()
 	//Get window size.
 	var width = window.innerWidth;
 	var height = window.innerHeight;
+
+	//Update sliders
+	updateDesertSld();
+	updateGoldSld();
+	updateSeaSld();
+	updateSunMoonSld();
 
 	//Make scaledMapCanvas fill bottom or right half of the window.
 	if(height > width)
@@ -290,6 +329,45 @@ function update()
 		scaledMapCanvas.style.top = "10px";
 	}	
 
+	calculateTypeCount();
+
 	//Redraw map.
 	render(mapCanvas, scaledMapCanvas, width, height, mapWidth, mapHeight);
+}
+
+function calculateTypeCount()
+{
+	typeCount = {"desert": 0, "sheep": 4, "ore": 3, "clay": 3, "wheat": 4, "wood": 4, "sea": 0, "gold": 0, "moons": 0, "suns": 0, "council": 0};
+	
+	if(document.getElementById("desertChk").checked)
+	{
+		typeCount.desert += Math.floor(document.getElementById("desertSld").value);
+	}
+	if(document.getElementById("goldChk").checked)
+	{
+		typeCount.gold += Math.floor(document.getElementById("goldSld").value);
+	}
+	if(document.getElementById("playerChk").checked)
+	{
+		typeCount.sheep += 2;
+		typeCount.ore += 2;
+		typeCount.clay += 2;
+		typeCount.wheat += 2;
+		typeCount.wood += 2;
+	}
+	if(document.getElementById("seaChk").checked)
+	{
+		typeCount.sea += Math.floor(document.getElementById("seaSld").value);
+		typeCount.sheep += 1;
+		typeCount.ore += 2;
+		typeCount.clay += 2;
+		typeCount.wheat += 1;
+		typeCount.wood += 1;
+	}
+	if(document.getElementById("explorersChk").checked)
+	{
+		typeCount.suns += Math.floor(document.getElementById("sunSld").value);
+		typeCount.moons += Math.floor(document.getElementById("moonSld").value);
+		typeCount.council = 1;
+	}
 }

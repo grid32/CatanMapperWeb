@@ -54,7 +54,7 @@ HexRow.prototype.toString = function(width)
 //////////////////////////////////////////////////////////
 // Map 													//
 //////////////////////////////////////////////////////////
-function Map(width, height)
+function Map(width, height, typeCount)
 {
 	this.height = height;
 	this.width = width;
@@ -78,20 +78,7 @@ function Map(width, height)
 		this.rows.push(newRow);
 	}
 
-	this.typeCount = 
-	{
-		0: 0,
-		1: 4,
-		2: 3,
-		3: 3,
-		4: 4,
-		5: 4,
-		6: 0,
-		7: 0,
-		8: 0,
-		9: 0,
-		10: 0
-	}
+	this.typeCount = typeCount;
 }
 
 Map.prototype.toString = function()
