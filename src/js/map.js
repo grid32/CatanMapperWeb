@@ -81,6 +81,31 @@ function Map(width, height, typeCount)
 	}
 
 	this.typeCount = typeCount;
+	this.filledCount = 0;
+
+	this.randomised = false;
+
+
+	var possible = this.getTileCount() <= this.countTiles();
+	if(possible)
+	{
+			//Explorers
+			if(this.typeCount[10] == 1)
+			{
+				this.placeCouncil();
+				this.fillExplorers();
+			}
+
+			//Seafarers
+			if(this.typeCount[6] > 0)
+			{
+				this.splitLand();
+				this.fillOcean();
+			}
+
+			//Land
+			this.randomised = this.randomise(0, this.typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+	}
 }
 
 Map.prototype.toString = function()
@@ -93,225 +118,354 @@ Map.prototype.toString = function()
 	return out;
 }
 
-Map.prototype.randomiseResources = function()
+Map.prototype.draw = function(ctx)
 {
-	for(var y = 0; y < this.rows.length; y++)
+	if(!this.randomised)
 	{
-		for(var x = 0; x < this.rows[y].len; x++)
+		s_noTiles.draw(ctx, (s_desert.width * this.width)/2 - s_noTiles.width/2, (s_desert.height * this.height)/2 - s_noTiles.height);
+	}
+	else
+	{
+		for(var y = 0; y < this.rows.length; y++)
 		{
-			this.rows[y].hexes[x].resource = Math.floor((Math.random() * 5) + 1);
+			for(var x = 0; x < this.rows[y].len; x++)
+			{
+				var currentTile = this.rows[y].hexes[x];
+				var	myX;
+				var myY;
+
+				var diff = this.width - this.rows[y].len;
+				myX = (x + (diff / 2)) * s_desert.width;
+				myY = y * (s_desert.height - (0.246 * s_desert.height));
+				
+				if(currentTile.resource == 0)
+				{
+					s_desert.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 1)
+				{
+					s_sheep.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 2)
+				{
+					s_ore.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 3)
+				{
+					s_clay.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 4)
+				{
+					s_wheat.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 5)
+				{
+					s_wood.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 6)
+				{
+					s_sea.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 7)
+				{
+					s_gold.draw(ctx, myX, myY);
+				}
+				else if(currentTile.resource == 8)
+				{
+					s_sea.draw(ctx, myX, myY);
+					s_moon.draw(ctx, myX + s_sea.width/2 - s_moon.width/2, myY + s_sea.height/2 - s_moon.width/2);	
+				}
+				else if(currentTile.resource == 9)
+				{
+					s_sea.draw(ctx, myX, myY);
+					s_sun.draw(ctx, myX + s_sea.width/2 - s_sun.width/2, myY + s_sea.height/2 - s_sun.width/2);
+				}
+				else if(currentTile.resource == 10)
+				{
+					s_council.draw(ctx, myX, myY);
+				}
+			}
 		}
 	}
 }
 
-Map.prototype.draw = function(ctx)
+Map.prototype.placeCouncil = function()
 {
-	for(var y = 0; y < this.rows.length; y++)
-	{
-		for(var x = 0; x < this.rows[y].len; x++)
-		{
-			var currentTile = this.rows[y].hexes[x];
-			var	myX;
-			var myY;
+	var y = Math.floor(Math.random() * this.height),
+		x = Math.floor(Math.random() * this.rows[y].len);
+	this.rows[y].hexes[x].resource = 10;
+	this.typeCount[10] = 0;
+	this.filledCount++;
+}
 
-			var diff = this.width - this.rows[y].len;
-			myX = (x + (diff / 2)) * s_desert.width;
-			myY = y * (s_desert.height - (0.246 * s_desert.height));
-			
-			if(currentTile.resource == 0)
+Map.prototype.fillExplorers = function()
+{
+	var y = Math.floor(Math.random() * this.height),
+		x = Math.floor(Math.random() * this.rows[y].len);
+
+	for(var type = 8; type <= 9; type++)
+	{
+		while(this.typeCount[type] > 0 && this.filledCount < this.getTileCount())
+		{
+			if(this.rows[y].hexes[x].resource == -1)
 			{
-				s_desert.draw(ctx, myX, myY);
+				this.rows[y].hexes[x].resource = type;
+				this.filledCount++;
+				this.typeCount[type]--;
 			}
-			else if(currentTile.resource == 1)
-			{
-				s_sheep.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 2)
-			{
-				s_ore.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 3)
-			{
-				s_clay.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 4)
-			{
-				s_wheat.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 5)
-			{
-				s_wood.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 6)
-			{
-				s_sea.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 7)
-			{
-				s_gold.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 8)
-			{
-				s_council.draw(ctx, myX, myY);
-			}
-			else if(currentTile.resource == 9)
-			{
-				s_sea.draw(ctx, myX, myY);
-				s_moon.draw(ctx, myX + s_sea.width/2 - s_moon.width/2, myY + s_sea.height/2 - s_moon.width/2);
-			}
-			else if(currentTile.resource == 10)
-			{
-				s_sea.draw(ctx, myX, myY);
-				s_sun.draw(ctx, myX + s_sea.width/2 - s_sun.width/2, myY + s_sea.height/2 - s_sun.width/2);
-			}
+			y += Math.floor((Math.random() * 3) - 1);
+			x += Math.floor((Math.random() * 3) - 1);
+
+			if(y >= this.height) {y = 0;}
+			if(y < 0) {y = this.height - 1;}
+			if(x >= this.rows[y].len) {x = 0;}
+			if(x < 0) {x = this.rows[y].len - 1;}
 		}
 	}
+}
+
+Map.prototype.splitLand = function()
+{
+	var y = 0,
+		x = Math.floor(this.rows[y].len / 2);
+	
+	while(typeCount[6] > 0 && y < this.height && this.filledCount < this.getTileCount())
+	{
+		//y = i;
+		var xMod = Math.floor((Math.random() * 2) - 1);
+
+		if(((this.height + 1) / 2) > y) //Top half
+		{
+			xMod++;
+		}
+		
+		x += xMod;
+		if(x >= this.rows[y].len) {x = 0;}
+		if(x < 0) {x = this.rows[y].len - 1;}
+		
+		if(this.rows[y].hexes[x].resource == -1)
+		{
+			this.rows[y].hexes[x].resource = 6; //Make tile ocean.
+			this.typeCount[6]--;
+			this.filledCount++;
+		}
+		y++;
+	}
+}
+
+Map.prototype.fillOcean = function()
+{
+	var y = Math.floor(Math.random() * this.height),
+		x = Math.floor(Math.random() * this.rows[y].len);
+
+	
+	while(this.typeCount[6] > 0 && this.filledCount < this.getTileCount())
+	{
+		if(this.rows[y].hexes[x].resource == -1)
+		{
+			this.rows[y].hexes[x].resource = 6;
+			this.filledCount++;
+			this.typeCount[6]--;
+		}
+		y += Math.floor((Math.random() * 3) - 1);
+		x += Math.floor((Math.random() * 3) - 1);
+
+		if(y >= this.height) {y = 0;}
+		if(y < 0) {y = this.height - 1;}
+		if(x >= this.rows[y].len) {x = 0;}
+		if(x < 0) {x = this.rows[y].len - 1;}
+	}
+	
 }
 
 Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 {
-	var xY = this.getXY(currentTileID);
-	var currentType = this.rows[xY[1]].hexes[xY[0]].resource;
+	//xY = getXY(currentTileID);
+
+	//if currentType == -1
+		//Make list of remaining types
+
+		//do
+			//Set type to -1 (to reset if failed)
+			//Pick a remaining type
+			//Remove from remaining types
+			//Check its neighbours
+			//if Ok
+				//Set type
+				//if Done
+					//Return true
+				//else
+					//ret = randomise(currentTileID + 1, inCounts, this.updateCounts())
+		//while ret == false and there are types remaining
+		//return ret
+	//else
+		//if Done
+			//Return true
+		//else
+			//return randomise(currentTileID + 1, inCounts, currentCounts)
+
+	var xY = this.getXY(currentTileID),
+		currentType = this.rows[xY[1]].hexes[xY[0]].resource;
 
 	if(currentType == -1)
 	{
-		//////////////////////////////////////////////////
-		// TODO: Needs work.							//
-		//////////////////////////////////////////////////
-		//Make list of types remaining to try
-		var remainingTypes = {};
+		//Make list of remaining types
+		var remainingTypes = [];
 		for(var i = 0; i < inCounts.length; i++)
 		{
-			if(currentCounts[i]+1 <= inCounts[types[i]])
+			if(inCounts[i] > currentCounts[i])
 			{
-				remainingTypes.push(types[i]);
+				remainingTypes.push(i);
+			}
+		}
+
+		var ret = false;
+		while(ret == false && remainingTypes.length > 0)
+		{
+			this.rows[xY[1]].hexes[xY[0]].resource = -1; //Set type to -1 (to reset if failed)
+			
+			//Pick a remaining type
+			var random = Math.floor(Math.random() * remainingTypes.length),
+				randomType = remainingTypes[random];
+			
+			//Remove from remaining types
+			var index = remainingTypes.indexOf(randomType);
+			remainingTypes.splice(index, 1);
+
+
+			var possible = this.checkNeighbours(xY[0], xY[1], randomType); //Check its neighbours
+			if(possible)
+			{
+				this.rows[xY[1]].hexes[xY[0]].resource = randomType; //Set type
+
+				if(currentTileID == this.getTileCount() - 1)
+				{
+					return true;
+				}
+				else
+				{
+					ret = this.randomise(currentTileID + 1, inCounts, this.updateCounts(randomType, currentCounts));
+				}
 			}
 		}
 		
-
-		var ret = false;
-		var randomType, random;
-		do
-		{
-			//Pick random type
-			do
-			{
-				random = Math.floor((Math.random() * 11));
-				randomType = types[random];
-			}
-			while(remainingTypes[randomType] == -1 && remainingTypes.size() > 0);
-			
-			//Check it fits(neighbours, currentCount)
-			var possible = true;
-			var changeChance = checkNeighbours(xY[0], xY[1], randomType);
-			var randChance = Math.floor((Math.random() * 101));
-			if(changeChance > randChance)
-			{
-				possible = false;
-			}
-
-			if(currentCounts[random]+1 > inCounts[randomType])
-			{
-				possible = false;
-			}
-			/* TODO: */ remainingTypes.removeElement(randomType); //Remove from remaining
-			if(possible)
-			{
-				this.rows[xY[1]].hexes[xY[0]].resource = randomType;
-				//Increment currentCount[type]
-				if(currentTileID >= getTileCount() - 1)
-					return true;
-				else
-				{
-					ret = this.randomise(currentTileID + 1, inCounts, updateCounts(random, currentCounts));
-				}
-				if(!ret)
-				{
-					//Decrement currentcount[type]
-					this.rows[xY[1]].hexes[xY[0]].resource = -1;
-				}
-			}
-		}
-		while(ret == false && remainingTypes.size() > 0);
 		return ret;
 	}
 	else
 	{
-		if(currentTileID >= getTileCount() - 1)
+		if(currentTileID == this.getTileCount() - 1)
 		{
 			return true;
 		}
 		else
+		{
 			return this.randomise(currentTileID + 1, inCounts, currentCounts);
+		}
 	}
 }
 
-Map.prototype.getXY = function(inIndex)
+Map.prototype.getTileCount = function()
+{
+	//Courtesy of Timothy Peskett - http://www.github.com/TimPeskett
+	return Math.floor((this.width*(this.height-1) - (Math.pow(this.height-1, 2)/4) - ((this.height-1)/2) + this.width));
+}
+
+Map.prototype.countTiles = function()
+{
+	var count = 0;
+	for(var i = 0; i < this.typeCount.length; i++)
 	{
-		var xy = [0, 0];
-		var count = 0;
-		for(var y = 0; y < this.rows.length; y++)
+		count += this.typeCount[i];
+	}
+	return count;
+}
+
+Map.prototype.getXY = function(inID)
+{
+	var xy = [0, 0];
+	var count = 0;
+	for(var y = 0; y < this.rows.length; y++)
+	{
+		for(var x = 0; x < this.rows[y].hexes.length; x++)
 		{
-			for(var x = 0; x < this.rows[y].length; x++)
+			if(count == inID)
 			{
-				if(count == inIndex)
-				{
-					xy[0] = x;
-					xy[1] = y;
-				}
-				count++;
+				xy[0] = x;
+				xy[1] = y;
 			}
+			count++;
 		}
-		return xy;
+	}
+	return xy;
+}
+
+Map.prototype.updateCounts = function(inID, inCounts)
+{
+	var retCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	for(var i = 0; i < inCounts.length; i++)
+	{
+		retCounts[i] = inCounts[i];
+		if(i == inID)
+		{
+			retCounts[i]++;
+		}
+	}
+	return retCounts;
+}
+
+Map.prototype.checkNeighbours = function(inX, inY, myType)
+{
+	var possible = true;
+
+	//Check <
+	if(inX > 0)
+	{
+		if(this.rows[inY].hexes[inX - 1].resource == myType)
+		{
+			possible = false;
+		}
 	}
 
-	Map.prototype.checkNeighbours = function(inX, inY, myType)
+	if(inY > 0)
 	{
-		var chance = 75;
-
-		if(inX > 0)
-		{
-			if(rows[inY].getHex(inX - 1).getTypeID() == myType) //Check <
-			{
-				chance *= 1.15;
-			}
-		}
-
-		if(inY > 0)
-		{
-			if((height+1)/2 >= inY + 1) //Top half
-			{
-				if(inX < rows[inY - 1].length)
-				{
-					if(rows[inY - 1].getHex(inX).getTypeID() == myType) //Check ^>
-					{
-						chance *= 1.15;
-					}
-				}
-				if(inX > 0)
-				{
-					if(rows[inY - 1].getHex(inX - 1).getTypeID() == myType) //Check <^
-					{
-						chance *= 1.15;
-					}
-				}
-			}
-			else
-			{
-				if(rows[inY - 1].getHex(inX).getTypeID() == myType) //Check <^
-				{
-					chance *= 1.15;
-				}
-				if(rows[inY - 1].getHex(inX + 1).getTypeID() == myType) //Check ^>
-				{
-					chance *= 1.15;
-				}
-			}
-		}
 		
-		if(chance == 75)
-			chance = 0;
+		if((this.height + 1) / 2 >= inY + 1)
+		{
+			//Top Half
+			//Check <^
+			if(inX > 0)
+			{
+				if(this.rows[inY - 1].hexes[inX - 1].resource == myType)
+				{
+					possible = false;
+				}
+			}
+
+			//Check ^>
+			if(inX + 1 <= this.rows[inY - 1].len)
+			{
+				if(this.rows[inY - 1].hexes[inX].resource == myType)
+				{
+					possible = false;
+				}
+			}
+		}
 		else
-			chance = 101;
-		return (int) chance;
+		{
+			//Bottom Half
+			//Check <^
+			if(this.rows[inY - 1].hexes[inX].resource == myType)
+			{
+				possible = false;
+			}
+
+			//Check ^>
+			if(this.rows[inY - 1].hexes[inX + 1].resource == myType)
+			{
+				possible = false;
+			}
+		}
 	}
+
+	return possible;
+}

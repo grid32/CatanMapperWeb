@@ -1,5 +1,5 @@
 var map = null,
-	typeCount = {"desert": 1, "sheep": 4, "ore": 3, "clay": 3, "wheat": 4, "wood": 4, "sea": 0, "gold": 0, "moons": 0, "suns": 0, "council": 0};
+	typeCount = [0, 4, 3, 3, 4, 4, 0, 0, 0, 0, 0];
 
 //Creates a new map.
 function drawMap(ctx, width, height)
@@ -7,7 +7,6 @@ function drawMap(ctx, width, height)
 	if(map == null || map.height != height || map.width != width || !compareTypeCounts())
 	{
 		map = new Map(width, height, typeCount);
-		map.randomise(0, typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 	}
 	map.draw(ctx);
 }
@@ -62,6 +61,12 @@ function explorersClick(value)
 {
 	setMapSize();
 	showMe("explorers", value);
+	update();
+}
+
+function redrawClick()
+{
+	map = null;
 	update();
 }
 
@@ -337,37 +342,37 @@ function update()
 
 function calculateTypeCount()
 {
-	typeCount = {"desert": 0, "sheep": 4, "ore": 3, "clay": 3, "wheat": 4, "wood": 4, "sea": 0, "gold": 0, "moons": 0, "suns": 0, "council": 0};
+	typeCount = [0, 4, 3, 3, 4, 4, 0, 0, 0, 0, 0];
 	
 	if(document.getElementById("desertChk").checked)
 	{
-		typeCount.desert += Math.floor(document.getElementById("desertSld").value);
+		typeCount[0] += Math.floor(document.getElementById("desertSld").value);
 	}
 	if(document.getElementById("goldChk").checked)
 	{
-		typeCount.gold += Math.floor(document.getElementById("goldSld").value);
+		typeCount[7] += Math.floor(document.getElementById("goldSld").value);
 	}
 	if(document.getElementById("playerChk").checked)
 	{
-		typeCount.sheep += 2;
-		typeCount.ore += 2;
-		typeCount.clay += 2;
-		typeCount.wheat += 2;
-		typeCount.wood += 2;
+		typeCount[1] += 2;
+		typeCount[2] += 2;
+		typeCount[3] += 2;
+		typeCount[4] += 2;
+		typeCount[5] += 2;
 	}
 	if(document.getElementById("seaChk").checked)
 	{
-		typeCount.sea += Math.floor(document.getElementById("seaSld").value);
-		typeCount.sheep += 1;
-		typeCount.ore += 2;
-		typeCount.clay += 2;
-		typeCount.wheat += 1;
-		typeCount.wood += 1;
+		typeCount[6] += Math.floor(document.getElementById("seaSld").value);
+		typeCount[1] += 1;
+		typeCount[2] += 2;
+		typeCount[3] += 2;
+		typeCount[4] += 1;
+		typeCount[5] += 1;
 	}
 	if(document.getElementById("explorersChk").checked)
 	{
-		typeCount.suns += Math.floor(document.getElementById("sunSld").value);
-		typeCount.moons += Math.floor(document.getElementById("moonSld").value);
-		typeCount.council = 1;
+		typeCount[8] += Math.floor(document.getElementById("moonSld").value);
+		typeCount[9] += Math.floor(document.getElementById("sunSld").value);
+		typeCount[10] = 1;
 	}
 }

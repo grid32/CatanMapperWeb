@@ -31,4 +31,6 @@ function initSprites(img)
 
 	s_moon	 	= new Sprite(img, 690, 273, 60, 60);	//9
 	s_sun	 	= new Sprite(img, 776, 277, 60, 60);	//10
+
+	s_noTiles 	= new Sprite(img, 878, 306, 314, 110);
 }
