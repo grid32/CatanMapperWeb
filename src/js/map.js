@@ -24,7 +24,7 @@ function HexRow(len)
 	this.hexes = [];
 	for(var i = 0; i < len; i++)
 	{
-		var newHex = new Hex(0, 0, i, 0);
+		var newHex = new Hex(-1, 0, i, 0);
 		this.hexes.push(newHex);
 	}
 }
@@ -54,6 +54,8 @@ HexRow.prototype.toString = function(width)
 //////////////////////////////////////////////////////////
 // Map 													//
 //////////////////////////////////////////////////////////
+var types = ["desert", "sheep", "ore", "clay", "wheat", "wood", "sea", "gold", "moons", "suns", "council"];
+
 function Map(width, height, typeCount)
 {
 	this.height = height;
@@ -165,3 +167,151 @@ Map.prototype.draw = function(ctx)
 		}
 	}
 }
+
+Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
+{
+	var xY = this.getXY(currentTileID);
+	var currentType = this.rows[xY[1]].hexes[xY[0]].resource;
+
+	if(currentType == -1)
+	{
+		//////////////////////////////////////////////////
+		// TODO: Needs work.							//
+		//////////////////////////////////////////////////
+		//Make list of types remaining to try
+		var remainingTypes = {};
+		for(var i = 0; i < inCounts.length; i++)
+		{
+			if(currentCounts[i]+1 <= inCounts[types[i]])
+			{
+				remainingTypes.push(types[i]);
+			}
+		}
+		
+
+		var ret = false;
+		var randomType, random;
+		do
+		{
+			//Pick random type
+			do
+			{
+				random = Math.floor((Math.random() * 11));
+				randomType = types[random];
+			}
+			while(remainingTypes[randomType] == -1 && remainingTypes.size() > 0);
+			
+			//Check it fits(neighbours, currentCount)
+			var possible = true;
+			var changeChance = checkNeighbours(xY[0], xY[1], randomType);
+			var randChance = Math.floor((Math.random() * 101));
+			if(changeChance > randChance)
+			{
+				possible = false;
+			}
+
+			if(currentCounts[random]+1 > inCounts[randomType])
+			{
+				possible = false;
+			}
+			/* TODO: */ remainingTypes.removeElement(randomType); //Remove from remaining
+			if(possible)
+			{
+				this.rows[xY[1]].hexes[xY[0]].resource = randomType;
+				//Increment currentCount[type]
+				if(currentTileID >= getTileCount() - 1)
+					return true;
+				else
+				{
+					ret = this.randomise(currentTileID + 1, inCounts, updateCounts(random, currentCounts));
+				}
+				if(!ret)
+				{
+					//Decrement currentcount[type]
+					this.rows[xY[1]].hexes[xY[0]].resource = -1;
+				}
+			}
+		}
+		while(ret == false && remainingTypes.size() > 0);
+		return ret;
+	}
+	else
+	{
+		if(currentTileID >= getTileCount() - 1)
+		{
+			return true;
+		}
+		else
+			return this.randomise(currentTileID + 1, inCounts, currentCounts);
+	}
+}
+
+Map.prototype.getXY = function(inIndex)
+	{
+		var xy = [0, 0];
+		var count = 0;
+		for(var y = 0; y < this.rows.length; y++)
+		{
+			for(var x = 0; x < this.rows[y].length; x++)
+			{
+				if(count == inIndex)
+				{
+					xy[0] = x;
+					xy[1] = y;
+				}
+				count++;
+			}
+		}
+		return xy;
+	}
+
+	Map.prototype.checkNeighbours = function(inX, inY, myType)
+	{
+		var chance = 75;
+
+		if(inX > 0)
+		{
+			if(rows[inY].getHex(inX - 1).getTypeID() == myType) //Check <
+			{
+				chance *= 1.15;
+			}
+		}
+
+		if(inY > 0)
+		{
+			if((height+1)/2 >= inY + 1) //Top half
+			{
+				if(inX < rows[inY - 1].length)
+				{
+					if(rows[inY - 1].getHex(inX).getTypeID() == myType) //Check ^>
+					{
+						chance *= 1.15;
+					}
+				}
+				if(inX > 0)
+				{
+					if(rows[inY - 1].getHex(inX - 1).getTypeID() == myType) //Check <^
+					{
+						chance *= 1.15;
+					}
+				}
+			}
+			else
+			{
+				if(rows[inY - 1].getHex(inX).getTypeID() == myType) //Check <^
+				{
+					chance *= 1.15;
+				}
+				if(rows[inY - 1].getHex(inX + 1).getTypeID() == myType) //Check ^>
+				{
+					chance *= 1.15;
+				}
+			}
+		}
+		
+		if(chance == 75)
+			chance = 0;
+		else
+			chance = 101;
+		return (int) chance;
+	}

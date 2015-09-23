@@ -7,7 +7,7 @@ function drawMap(ctx, width, height)
 	if(map == null || map.height != height || map.width != width || !compareTypeCounts())
 	{
 		map = new Map(width, height, typeCount);
-		map.randomise(0, typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+		map.randomiseResources();
 	}
 	map.draw(ctx);
 }
