@@ -349,6 +349,11 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 			}
 		}
 		
+		if(ret == false)
+		{
+			this.rows[xY[1]].hexes[xY[0]].resource = -1; //Reset type
+		}
+
 		return ret;
 	}
 	else
