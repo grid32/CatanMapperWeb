@@ -105,6 +105,12 @@ function Map(width, height, typeCount)
 
 			//Land
 			this.randomised = this.randomise(0, this.typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+			//Rarity
+			var count = this.getTileCount();
+			//count -= this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10];
+			var each = Math.ceil(count / 7);
+			console.log(this.randomRarity(0, [each, each, each, each, each, each, each, each, each, each]));
 	}
 }
 
@@ -122,7 +128,7 @@ Map.prototype.draw = function(ctx)
 {
 	if(!this.randomised)
 	{
-		s_noTiles.draw(ctx, (s_desert.width * this.width)/2 - s_noTiles.width/2, (s_desert.height * this.height)/2 - s_noTiles.height);
+		s_noTiles.draw(ctx, (s_resources[0].width * this.width)/2 - s_noTiles.width/2, (s_resources[0].height * this.height)/2 - s_noTiles.height);
 	}
 	else
 	{
@@ -135,54 +141,23 @@ Map.prototype.draw = function(ctx)
 				var myY;
 
 				var diff = this.width - this.rows[y].len;
-				myX = (x + (diff / 2)) * s_desert.width;
-				myY = y * (s_desert.height - (0.246 * s_desert.height));
+				myX = (x + (diff / 2)) * s_resources[0].width;
+				myY = y * (s_resources[0].height - (0.246 * s_resources[0].height));
 				
-				if(currentTile.resource == 0)
+				s_resources[currentTile.resource].draw(ctx, myX, myY);
+
+				if(currentTile.resource == 8)
 				{
-					s_desert.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 1)
-				{
-					s_sheep.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 2)
-				{
-					s_ore.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 3)
-				{
-					s_clay.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 4)
-				{
-					s_wheat.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 5)
-				{
-					s_wood.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 6)
-				{
-					s_sea.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 7)
-				{
-					s_gold.draw(ctx, myX, myY);
-				}
-				else if(currentTile.resource == 8)
-				{
-					s_sea.draw(ctx, myX, myY);
-					s_moon.draw(ctx, myX + s_sea.width/2 - s_moon.width/2, myY + s_sea.height/2 - s_moon.width/2);	
+					s_moon.draw(ctx, myX + s_resources[0].width/2 - s_moon.width/2, myY + s_resources[0].height/2 - s_moon.width/2);	
 				}
 				else if(currentTile.resource == 9)
 				{
-					s_sea.draw(ctx, myX, myY);
-					s_sun.draw(ctx, myX + s_sea.width/2 - s_sun.width/2, myY + s_sea.height/2 - s_sun.width/2);
+					s_sun.draw(ctx, myX + s_resources[0].width/2 - s_sun.width/2, myY + s_resources[0].height/2 - s_sun.width/2);
 				}
-				else if(currentTile.resource == 10)
+
+				if(currentTile.rarity != 0)
 				{
-					s_council.draw(ctx, myX, myY);
+					s_rarity[currentTile.rarity - 2].draw(ctx, myX + s_resources[0].width/2 - s_rarity[0].width/2, myY + s_resources[0].height/2 - s_rarity[0].height/2);
 				}
 			}
 		}
@@ -333,7 +308,7 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 			remainingTypes.splice(index, 1);
 
 
-			var possible = this.checkNeighbours(xY[0], xY[1], randomType); //Check its neighbours
+			var possible = this.checkNeighbourType(xY[0], xY[1], randomType); //Check its neighbours
 			if(possible)
 			{
 				this.rows[xY[1]].hexes[xY[0]].resource = randomType; //Set type
@@ -418,7 +393,7 @@ Map.prototype.updateCounts = function(inID, inCounts)
 	return retCounts;
 }
 
-Map.prototype.checkNeighbours = function(inX, inY, myType)
+Map.prototype.checkNeighbourType = function(inX, inY, myType)
 {
 	var possible = true;
 
@@ -473,4 +448,244 @@ Map.prototype.checkNeighbours = function(inX, inY, myType)
 	}
 
 	return possible;
+}
+
+Map.prototype.randomRarity = function(currentTileID, currentCount)
+{
+	console.log(currentTileID + ": ");
+	console.log(currentCount);
+	var xY = this.getXY(currentTileID),
+		currentRarity = this.rows[xY[1]].hexes[xY[0]].rarity,
+		currentType = this.rows[xY[1]].hexes[xY[0]].resource,
+		landTypes = [1, 2, 3, 4, 5, 7];
+
+	if(currentRarity == 0 && landTypes.indexOf(currentType) > -1)
+	{
+		//Make list of remaining rarities
+		var remainingRarities = [];// = [2, 3, 4, 5, 6, 8, 9, 10, 11, 12];
+		if(currentCount[0] > 0)
+		{
+			remainingRarities.push(2);
+		}
+		if(currentCount[1] > 0)
+		{
+			remainingRarities.push(3);
+		}
+		if(currentCount[2] > 0)
+		{
+			remainingRarities.push(4);
+		}
+		if(currentCount[3] > 0)
+		{
+			remainingRarities.push(5);
+		}
+		if(currentCount[4] > 0)
+		{
+			remainingRarities.push(6);
+		}
+		if(currentCount[5] > 0)
+		{
+			remainingRarities.push(8);
+		}
+		if(currentCount[6] > 0)
+		{
+			remainingRarities.push(9);
+		}
+		if(currentCount[7] > 0)
+		{
+			remainingRarities.push(10);
+		}
+		if(currentCount[8] > 0)
+		{
+			remainingRarities.push(11);
+		}
+		if(currentCount[9] > 0)
+		{
+			remainingRarities.push(12);
+		}
+		console.log(remainingRarities);
+
+		var ret = false;
+		while(ret == false && remainingRarities.length > 0)
+		{
+			if(this.rows[xY[1]].hexes[xY[0]].rarity != 0)
+			{
+				var sub = 2;
+				if(this.rows[xY[1]].hexes[xY[0]].rarity > 7)
+				{
+					sub = 3;
+				}
+				currentCount[this.rows[xY[1]].hexes[xY[0]].rarity - sub]++;
+				this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Set rarity to 0 (to reset if failed)
+			}
+			
+			
+			//Pick a remaining rarity
+			var random = Math.floor(Math.random() * remainingRarities.length),
+				randRarity = remainingRarities[random];
+			
+			//Remove from remaining rarities
+			var index = remainingRarities.indexOf(randRarity);
+			remainingRarities.splice(index, 1);
+
+
+			var possible = this.checkNeighbourRarity(xY[0], xY[1], randRarity); //Check its neighbours
+			if(possible == 0) //Fine
+			{
+				console.log(random + " index");
+				console.log(randRarity + " chosen.");
+				var sub = 2;
+				if(randRarity > 7)
+				{
+					sub = 3;
+				}
+				currentCount[randRarity - sub]--;
+
+				this.rows[xY[1]].hexes[xY[0]].rarity = randRarity; //Set rarity
+
+				if(currentTileID == this.getTileCount() - 1)
+				{
+					return true;
+				}
+				else
+				{
+					ret = this.randomRarity(currentTileID + 1, currentCount);
+				}
+			}
+			else if(possible == 1) //Need bigger
+			{
+				//Remove all smaller
+				for(var i = 0; i < random; i++)
+				{
+					remainingRarities.splice(0, 1);
+				}
+			}
+			else if(possible == -1) //Need smaller
+			{
+				//Remove all bigger
+				while(random < remainingRarities.length)
+				{
+					remainingRarities.splice(random, 1);
+				}
+			}
+			else if(possible == -2) //Same as neighbour
+			{
+				remainingRarities.splice(random, 1);
+			}
+		}
+		
+		if(ret == false)
+		{
+			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset rarity
+		}
+
+		return ret;
+	}
+	else
+	{
+		if(currentTileID == this.getTileCount() - 1)
+		{
+			return true;
+		}
+		else
+		{
+			return this.randomRarity(currentTileID + 1, currentCount);
+		}
+	}
+}
+
+Map.prototype.updateCurrentCount = function(inCurrentCount, inID)
+{
+	console.log("CurrentCount[" + inID + "] decremented.");
+	var copy = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	for(var i = 0; i < inCurrentCount.length; i++)
+	{
+		copy[i] = inCurrentCount[i];
+		if(inID == i)
+		{
+			copy[i]--;
+		}
+	}
+	return copy;
+}
+
+Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
+{
+	var noOfNeighbours = 1;
+	var totalRarity = inRarity;
+	var spotLookup = {2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1};
+	var ret = 0;
+
+	//Check <
+	if(inX > 0)
+	{
+		noOfNeighbours++;
+		totalRarity += spotLookup[this.rows[inY].hexes[inX - 1].rarity];
+		if(inRarity == this.rows[inY].hexes[inX - 1].rarity)
+		{
+			ret = -2;
+		}
+	}
+
+	if(inY > 0)
+	{
+		
+		if((this.height + 1) / 2 >= inY + 1)
+		{
+			//Top Half
+			//Check <^
+			if(inX > 0)
+			{
+				noOfNeighbours++;
+				totalRarity += spotLookup[this.rows[inY - 1].hexes[inX - 1].rarity];
+				if(inRarity == this.rows[inY - 1].hexes[inX - 1].rarity)
+				{
+					ret = -2;
+				}
+			}
+
+			//Check ^>
+			if(inX + 1 <= this.rows[inY - 1].len)
+			{
+				noOfNeighbours++;
+				totalRarity += spotLookup[this.rows[inY - 1].hexes[inX].rarity];
+				if(inRarity == this.rows[inY - 1].hexes[inX].rarity)
+				{
+					ret = -2;
+				}
+			}
+		}
+		else
+		{
+			//Bottom Half
+			//Check <^
+			noOfNeighbours++;
+			totalRarity += spotLookup[this.rows[inY - 1].hexes[inX].rarity];
+			if(inRarity == this.rows[inY - 1].hexes[inX].rarity)
+			{
+				ret = -2;
+			}
+
+			//Check ^>
+			noOfNeighbours++;
+			totalRarity += spotLookup[this.rows[inY - 1].hexes[inX + 1].rarity];
+			if(inRarity == this.rows[inY - 1].hexes[inX + 1].rarity)
+			{
+				ret = -2;
+			}
+		}
+	}
+
+	if(ret == 0)
+	{
+		if(totalRarity/noOfNeighbours > 3.5)
+		{
+			ret = -1;
+		}
+		else if(totalRarity/noOfNeighbours < 2.5)
+		{
+			ret = 1;
+		}
+	}
+	return ret;
 }

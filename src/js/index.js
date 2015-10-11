@@ -290,8 +290,8 @@ function render(mapCanvas, scaledMapCanvas, windowWidth, windowHeight, mapWidth,
 		windowWidth /= heightMod;
 	}
 
-	mapCanvas.width = s_desert.width * mapWidth;
-	mapCanvas.height = ((s_desert.height - (0.246 * s_desert.height)) * (mapHeight - 1)) + s_desert.height;
+	mapCanvas.width = s_resources[0].width * mapWidth;
+	mapCanvas.height = ((s_resources[0].height - (0.246 * s_resources[0].height)) * (mapHeight - 1)) + s_resources[0].height;
 
 	var ctx = mapCanvas.getContext("2d");
 	drawMap(ctx, mapWidth, mapHeight);
