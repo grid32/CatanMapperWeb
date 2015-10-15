@@ -50,10 +50,10 @@ function initSprites(img)
 
 		new Sprite(img, 0, 0, 0, 0), //Filler (7)
 
-		new Sprite(img, 794, 38, 38, 38), //8
-		new Sprite(img, 832, 38, 38, 38), //9
+		new Sprite(img, 946, 38, 38, 38), //8
+		new Sprite(img, 908, 38, 38, 38), //9
 		new Sprite(img, 870, 38, 38, 38), //10
-		new Sprite(img, 908, 38, 38, 38), //11
-		new Sprite(img, 946, 38, 38, 38) //12
+		new Sprite(img, 832, 38, 38, 38), //11
+		new Sprite(img, 794, 38, 38, 38) //12
 	];
 }
