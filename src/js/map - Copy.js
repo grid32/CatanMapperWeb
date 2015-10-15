@@ -108,9 +108,15 @@ function Map(width, height, typeCount)
 
 			//Rarity
 			var count = this.getTileCount();
-			//count -= this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10];
-			var each = Math.ceil(count / 7);
-			console.log(this.randomRarity(0, [each, each, each, each, each, each, each, each, each, each]));
+			count -= this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10];
+			var each = count / 18;
+			var re;
+			do
+			{
+				re = this.randomRarity(0, [each, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each]);
+				console.log(re);
+			}
+			while(!re);
 	}
 }
 
@@ -452,8 +458,6 @@ Map.prototype.checkNeighbourType = function(inX, inY, myType)
 
 Map.prototype.randomRarity = function(currentTileID, currentCount)
 {
-	console.log(currentTileID + ": ");
-	console.log(currentCount);
 	var xY = this.getXY(currentTileID),
 		currentRarity = this.rows[xY[1]].hexes[xY[0]].rarity,
 		currentType = this.rows[xY[1]].hexes[xY[0]].resource,
@@ -462,86 +466,38 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 	if(currentRarity == 0 && landTypes.indexOf(currentType) > -1)
 	{
 		//Make list of remaining rarities
-		var remainingRarities = [];// = [2, 3, 4, 5, 6, 8, 9, 10, 11, 12];
-		if(currentCount[0] > 0)
+		var remainingRarity = [];
+		for(var i = 0; i < currentCount.length; i++)
 		{
-			remainingRarities.push(2);
+			var add = 2;
+			if(i >= 5)
+			{
+				add = 3;
+			}
+			if(currentCount[i] > 0)
+			{
+				remainingRarity.push(i + add);
+			}
 		}
-		if(currentCount[1] > 0)
-		{
-			remainingRarities.push(3);
-		}
-		if(currentCount[2] > 0)
-		{
-			remainingRarities.push(4);
-		}
-		if(currentCount[3] > 0)
-		{
-			remainingRarities.push(5);
-		}
-		if(currentCount[4] > 0)
-		{
-			remainingRarities.push(6);
-		}
-		if(currentCount[5] > 0)
-		{
-			remainingRarities.push(8);
-		}
-		if(currentCount[6] > 0)
-		{
-			remainingRarities.push(9);
-		}
-		if(currentCount[7] > 0)
-		{
-			remainingRarities.push(10);
-		}
-		if(currentCount[8] > 0)
-		{
-			remainingRarities.push(11);
-		}
-		if(currentCount[9] > 0)
-		{
-			remainingRarities.push(12);
-		}
-		console.log(remainingRarities);
 
 		var ret = false;
-		while(ret == false && remainingRarities.length > 0)
+		while(ret == false && remainingRarity.length > 0)
 		{
-			if(this.rows[xY[1]].hexes[xY[0]].rarity != 0)
-			{
-				var sub = 2;
-				if(this.rows[xY[1]].hexes[xY[0]].rarity > 7)
-				{
-					sub = 3;
-				}
-				currentCount[this.rows[xY[1]].hexes[xY[0]].rarity - sub]++;
-				this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Set rarity to 0 (to reset if failed)
-			}
+			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Set type to -1 (to reset if failed)
 			
+			//Pick a remaining type
+			var random = Math.floor(Math.random() * remainingRarity.length),
+				randRarity = remainingRarity[random];
 			
-			//Pick a remaining rarity
-			var random = Math.floor(Math.random() * remainingRarities.length),
-				randRarity = remainingRarities[random];
-			
-			//Remove from remaining rarities
-			var index = remainingRarities.indexOf(randRarity);
-			remainingRarities.splice(index, 1);
+			//Remove from remaining types
+			var index = remainingRarity.indexOf(randRarity);
+			remainingRarity.splice(index, 1);
 
 
 			var possible = this.checkNeighbourRarity(xY[0], xY[1], randRarity); //Check its neighbours
-			if(possible == 0) //Fine
+			if(possible == 0)
 			{
-				console.log(random + " index");
-				console.log(randRarity + " chosen.");
-				var sub = 2;
-				if(randRarity > 7)
-				{
-					sub = 3;
-				}
-				currentCount[randRarity - sub]--;
-
-				this.rows[xY[1]].hexes[xY[0]].rarity = randRarity; //Set rarity
+				this.rows[xY[1]].hexes[xY[0]].rarity = randRarity; //Set type
 
 				if(currentTileID == this.getTileCount() - 1)
 				{
@@ -549,7 +505,20 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 				}
 				else
 				{
-					ret = this.randomRarity(currentTileID + 1, currentCount);
+					var sub = 2;
+					if(randRarity > 7)
+					{
+						sub = 3;
+					}
+					ret = this.randomRarity(currentTileID + 1, this.updateCurrentCount(currentCount, randRarity - sub));
+				}
+			}
+			else if(possible == -1) //Need smaller
+			{
+				//Remove all bigger
+				while(random < remainingRarity.length)
+				{
+					remainingRarity.splice(random, 1);
 				}
 			}
 			else if(possible == 1) //Need bigger
@@ -557,26 +526,14 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 				//Remove all smaller
 				for(var i = 0; i < random; i++)
 				{
-					remainingRarities.splice(0, 1);
+					remainingRarity.splice(0, 1);
 				}
-			}
-			else if(possible == -1) //Need smaller
-			{
-				//Remove all bigger
-				while(random < remainingRarities.length)
-				{
-					remainingRarities.splice(random, 1);
-				}
-			}
-			else if(possible == -2) //Same as neighbour
-			{
-				remainingRarities.splice(random, 1);
 			}
 		}
 		
 		if(ret == false)
 		{
-			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset rarity
+			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset type
 		}
 
 		return ret;
@@ -596,7 +553,6 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 
 Map.prototype.updateCurrentCount = function(inCurrentCount, inID)
 {
-	console.log("CurrentCount[" + inID + "] decremented.");
 	var copy = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 	for(var i = 0; i < inCurrentCount.length; i++)
 	{
@@ -678,11 +634,11 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 
 	if(ret == 0)
 	{
-		if(totalRarity/noOfNeighbours > 3.5)
+		if(totalRarity/noOfNeighbours > 4.25)
 		{
 			ret = -1;
 		}
-		else if(totalRarity/noOfNeighbours < 2.5)
+		else if(totalRarity/noOfNeighbours < 1.75)
 		{
 			ret = 1;
 		}

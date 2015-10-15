@@ -18,19 +18,42 @@ Sprite.prototype.draw = function(ctx, x, y)
 
 function initSprites(img) 
 {
-	s_desert 	= new Sprite(img, 1, 1, 219, 252);		//0
-	s_sheep 	= new Sprite(img, 220, 1, 219, 252);	//1
-	s_ore 		= new Sprite(img, 439, 1, 219, 252);	//2
-	s_clay	 	= new Sprite(img, 658, 1, 219, 252);	//3
-	s_wheat 	= new Sprite(img, 877, 1, 219, 252);	//4
-	s_wood	 	= new Sprite(img, 1096, 1, 219, 252);	//5
+	s_resources =
+	[
+		new Sprite(img, 0, 188, 156, 188),		//0 Desert
+		new Sprite(img, 0, 0, 156, 188),		//1 Sheep
+		new Sprite(img, 156, 0, 156, 188),		//2 Ore
+		new Sprite(img, 312, 0, 156, 188),		//3 Clay
+		new Sprite(img, 468, 0, 156, 188),		//4 Wheat
+		new Sprite(img, 624, 0, 156, 188),		//5 Wood
 
-	s_sea	 	= new Sprite(img, 1, 253, 219, 252);	//6
-	s_gold	 	= new Sprite(img, 220, 253, 219, 252);	//7
-	s_council 	= new Sprite(img, 440, 253, 219, 252);	//8
+		new Sprite(img, 156, 188, 156, 188),	//6 Sea
+		new Sprite(img, 312, 188, 156, 188),	//7 Gold
 
-	s_moon	 	= new Sprite(img, 690, 273, 60, 60);	//9
-	s_sun	 	= new Sprite(img, 776, 277, 60, 60);	//10
+		new Sprite(img, 156, 188, 156, 188),	//8 Moon
+		new Sprite(img, 156, 188, 156, 188),	//9 Sun
+		new Sprite(img, 468, 188, 156, 188) 	//10 Council
+	];
 
-	s_noTiles 	= new Sprite(img, 878, 306, 314, 110);
+	s_moon	 	= new Sprite(img, 677, 201, 38, 38);	//8
+	s_sun	 	= new Sprite(img, 637, 202, 38, 38);	//9
+
+	s_noTiles 	= new Sprite(img, 637, 259, 302, 93);
+
+	s_rarity =
+	[
+		new Sprite(img, 794, 0, 38, 38), //2
+		new Sprite(img, 832, 0, 38, 38), //3
+		new Sprite(img, 870, 0, 38, 38), //4
+		new Sprite(img, 908, 0, 38, 38), //5
+		new Sprite(img, 946, 0, 38, 38), //6
+
+		new Sprite(img, 0, 0, 0, 0), //Filler (7)
+
+		new Sprite(img, 946, 38, 38, 38), //8
+		new Sprite(img, 908, 38, 38, 38), //9
+		new Sprite(img, 870, 38, 38, 38), //10
+		new Sprite(img, 832, 38, 38, 38), //11
+		new Sprite(img, 794, 38, 38, 38) //12
+	];
 }

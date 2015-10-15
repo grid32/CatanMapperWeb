@@ -85,10 +85,25 @@ function Map(width, height, typeCount)
 
 	this.randomised = false;
 
-
 	var possible = this.getTileCount() <= this.countTiles();
 	if(possible)
 	{
+		var count = 0;
+		do
+		{
+			if(count > 0)
+			{
+				//Reset
+				for(var y = 0; y < this.rows.length; y++)
+				{
+					for(var x = 0; x < this.rows[y].hexes.length; x++)
+					{
+						this.rows[y].hexes[x].rarity = 0;
+						this.rows[y].hexes[x].resource = -1;
+					}
+				}
+			}
+
 			//Explorers
 			if(this.typeCount[10] == 1)
 			{
@@ -99,24 +114,56 @@ function Map(width, height, typeCount)
 			//Seafarers
 			if(this.typeCount[6] > 0)
 			{
+				var tempWater = this.typeCount[6];
 				this.splitLand();
 				this.fillOcean();
+				this.typeCount[6] = tempWater;
 			}
 
 			//Land
-			this.randomised = this.randomise(0, this.typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+			this.randomise(0, this.typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
 			//Rarity
-			var count = this.getTileCount();
-			count -= this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10];
-			var each = count / 18;
-			var re;
-			do
+			var tileCount = this.getTileCount();
+			tileCount -= (this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10]);
+
+			var defaultMap = false;
+			if(this.height == 5 && this.width == 5)
 			{
-				re = this.randomRarity(0, [each, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each]);
-				console.log(re);
+				if(this.typeCount.toString() == [1, 4, 3, 3, 4, 4, 0, 0, 0, 0, 0].toString())
+				{
+					defaultMap = true;
+				}
 			}
-			while(!re);
+
+			if(defaultMap) //Use because randomising rarity for default map is slow.
+			{
+				var rarities = [4, 3, 5, 3, 10, 8, 2, 6, 11, 9, 5, 11, 12, 10, 6, 9, 8, 4],
+					lands = [1, 2, 3, 4, 5, 7],
+					i = 0;
+
+				for(var y = 0; y < this.rows.length; y++)
+				{
+					for(var x = 0; x < this.rows[y].hexes.length; x++)
+					{
+						if(lands.indexOf(this.rows[y].hexes[x].resource) > -1)
+						{
+							this.rows[y].hexes[x].rarity = rarities[i];
+							i++;
+						}
+					}
+				}
+				this.randomised = true;
+			}
+			else
+			{
+				var each = tileCount / 18;
+				this.randomised = this.randomRarity(0, [each, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each]);
+			}
+
+			count++;
+		}
+		while(!this.randomised);
 	}
 }
 
@@ -175,14 +222,16 @@ Map.prototype.placeCouncil = function()
 	var y = Math.floor(Math.random() * this.height),
 		x = Math.floor(Math.random() * this.rows[y].len);
 	this.rows[y].hexes[x].resource = 10;
-	this.typeCount[10] = 0;
+	//this.typeCount[10] = 0;
 	this.filledCount++;
 }
 
 Map.prototype.fillExplorers = function()
 {
 	var y = Math.floor(Math.random() * this.height),
-		x = Math.floor(Math.random() * this.rows[y].len);
+		x = Math.floor(Math.random() * this.rows[y].len),
+		tempMoon = this.typeCount[8],
+		tempSun = this.typeCount[9];
 
 	for(var type = 8; type <= 9; type++)
 	{
@@ -203,6 +252,8 @@ Map.prototype.fillExplorers = function()
 			if(x < 0) {x = this.rows[y].len - 1;}
 		}
 	}
+	this.typeCount[8] = tempMoon;
+	this.typeCount[9] = tempSun;
 }
 
 Map.prototype.splitLand = function()
@@ -286,7 +337,8 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 			//return randomise(currentTileID + 1, inCounts, currentCounts)
 
 	var xY = this.getXY(currentTileID),
-		currentType = this.rows[xY[1]].hexes[xY[0]].resource;
+		currentType = this.rows[xY[1]].hexes[xY[0]].resource,
+		randomTypesSet = [0, 1, 2, 3, 4, 5, 7];
 
 	if(currentType == -1)
 	{
@@ -294,7 +346,7 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 		var remainingTypes = [];
 		for(var i = 0; i < inCounts.length; i++)
 		{
-			if(inCounts[i] > currentCounts[i])
+			if(inCounts[i] > currentCounts[i] && randomTypesSet.indexOf(i) > -1)
 			{
 				remainingTypes.push(i);
 			}
@@ -465,59 +517,31 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 
 	if(currentRarity == 0 && landTypes.indexOf(currentType) > -1)
 	{
-		//Make list of remaining types
+		//Make list of remaining rarities
 		var remainingRarity = [];
-		if(currentCount[0] > 0)
+		for(var i = 0; i < currentCount.length; i++)
 		{
-			remainingRarity.push(2);
-		}
-		if(currentCount[1] > 0)
-		{
-			remainingRarity.push(3);
-		}
-		if(currentCount[2] > 0)
-		{
-			remainingRarity.push(4);
-		}
-		if(currentCount[3] > 0)
-		{
-			remainingRarity.push(5);
-		}
-		if(currentCount[4] > 0)
-		{
-			remainingRarity.push(6);
-		}
-		if(currentCount[5] > 0)
-		{
-			remainingRarity.push(8);
-		}
-		if(currentCount[6] > 0)
-		{
-			remainingRarity.push(9);
-		}
-		if(currentCount[7] > 0)
-		{
-			remainingRarity.push(10);
-		}
-		if(currentCount[8] > 0)
-		{
-			remainingRarity.push(11);
-		}
-		if(currentCount[9] > 0)
-		{
-			remainingRarity.push(12);
+			var add = 2;
+			if(i >= 5)
+			{
+				add = 3;
+			}
+			if(currentCount[i] > 0)
+			{
+				remainingRarity.push(i + add);
+			}
 		}
 
 		var ret = false;
 		while(ret == false && remainingRarity.length > 0)
 		{
-			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Set type to -1 (to reset if failed)
+			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Set rarity to 0 (to reset if failed)
 			
-			//Pick a remaining type
+			//Pick a remaining rarity
 			var random = Math.floor(Math.random() * remainingRarity.length),
 				randRarity = remainingRarity[random];
 			
-			//Remove from remaining types
+			//Remove from remaining rarities
 			var index = remainingRarity.indexOf(randRarity);
 			remainingRarity.splice(index, 1);
 
@@ -525,7 +549,7 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 			var possible = this.checkNeighbourRarity(xY[0], xY[1], randRarity); //Check its neighbours
 			if(possible == 0)
 			{
-				this.rows[xY[1]].hexes[xY[0]].rarity = randRarity; //Set type
+				this.rows[xY[1]].hexes[xY[0]].rarity = randRarity; //Set rarity
 
 				if(currentTileID == this.getTileCount() - 1)
 				{
@@ -561,7 +585,7 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 		
 		if(ret == false)
 		{
-			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset type
+			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset rarity
 		}
 
 		return ret;
@@ -609,6 +633,10 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 		{
 			ret = -2;
 		}
+		else if(spotLookup[inRarity] == 5 && spotLookup[this.rows[inY].hexes[inX - 1].rarity] == 5)
+		{
+			ret = -2;
+		}
 	}
 
 	if(inY > 0)
@@ -626,6 +654,10 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 				{
 					ret = -2;
 				}
+				else if(spotLookup[inRarity] == 5 && spotLookup[this.rows[inY - 1].hexes[inX - 1].rarity] == 5)
+				{
+					ret = -2;
+				}
 			}
 
 			//Check ^>
@@ -634,6 +666,10 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 				noOfNeighbours++;
 				totalRarity += spotLookup[this.rows[inY - 1].hexes[inX].rarity];
 				if(inRarity == this.rows[inY - 1].hexes[inX].rarity)
+				{
+					ret = -2;
+				}
+				else if(spotLookup[inRarity] == 5 && spotLookup[this.rows[inY - 1].hexes[inX].rarity] == 5)
 				{
 					ret = -2;
 				}
@@ -649,11 +685,19 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 			{
 				ret = -2;
 			}
+			else if(spotLookup[inRarity] == 5 && spotLookup[this.rows[inY - 1].hexes[inX].rarity] == 5)
+			{
+				ret = -2;
+			}
 
 			//Check ^>
 			noOfNeighbours++;
 			totalRarity += spotLookup[this.rows[inY - 1].hexes[inX + 1].rarity];
 			if(inRarity == this.rows[inY - 1].hexes[inX + 1].rarity)
+			{
+				ret = -2;
+			}
+			else if(spotLookup[inRarity] == 5 && spotLookup[this.rows[inY - 1].hexes[inX + 1].rarity] == 5)
 			{
 				ret = -2;
 			}

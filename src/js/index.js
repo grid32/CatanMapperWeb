@@ -326,6 +326,14 @@ function update()
 		height /= 2;
 		scaledMapCanvas.style.top = height + "px";
 		scaledMapCanvas.style.left = "10px";
+		if(document.getElementById("bodyDiv").style.height > height - 20)
+		{
+			document.getElementById("bodyDiv").style.overflowY = "hidden";
+		}
+		else
+		{
+			document.getElementById("bodyDiv").style.overflowY = "scroll";
+		}
 	}
 	else
 	{
@@ -333,6 +341,8 @@ function update()
 		scaledMapCanvas.style.left = width + "px";
 		scaledMapCanvas.style.top = "10px";
 	}	
+
+	document.getElementById("bodyDiv").style.height = (height - 20) + "px";
 
 	calculateTypeCount();
 
