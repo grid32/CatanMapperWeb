@@ -83,15 +83,17 @@ function Map(width, height, typeCount)
 	this.typeCount = typeCount;
 	this.filledCount = 0;
 
+	this.landTiles = 0;
+
 	this.randomised = false;
 
 	var possible = this.getTileCount() <= this.countTiles();
 	if(possible)
 	{
-		var count = 0;
+		var loopCount = 0;
 		do
 		{
-			if(count > 0)
+			if(loopCount > 0)
 			{
 				//Reset
 				for(var y = 0; y < this.rows.length; y++)
@@ -102,6 +104,8 @@ function Map(width, height, typeCount)
 						this.rows[y].hexes[x].resource = -1;
 					}
 				}
+
+				this.landTiles = 0;
 			}
 
 			//Explorers
@@ -124,7 +128,7 @@ function Map(width, height, typeCount)
 			this.randomise(0, this.typeCount, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
 			//Rarity
-			var tileCount = this.getTileCount();
+			var tileCount = this.getTileCount(); //this.landTiles;
 			tileCount -= (this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10]);
 
 			var defaultMap = false;
@@ -157,11 +161,12 @@ function Map(width, height, typeCount)
 			}
 			else
 			{
+				//var each = ((tileCount / 18) / 3) * 2;
 				var each = tileCount / 18;
 				this.randomised = this.randomRarity(0, [each, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each]);
 			}
-
-			count++;
+			console.log(loopCount);
+			loopCount++;
 		}
 		while(!this.randomised);
 	}
@@ -370,10 +375,11 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 			if(possible)
 			{
 				this.rows[xY[1]].hexes[xY[0]].resource = randomType; //Set type
+				this.landTiles++;
 
 				if(currentTileID == this.getTileCount() - 1)
 				{
-					return true;
+					ret = true;
 				}
 				else
 				{
@@ -385,6 +391,7 @@ Map.prototype.randomise = function(currentTileID, inCounts, currentCounts)
 		if(ret == false)
 		{
 			this.rows[xY[1]].hexes[xY[0]].resource = -1; //Reset type
+			this.landTiles--;
 		}
 
 		return ret;
@@ -582,12 +589,11 @@ Map.prototype.randomRarity = function(currentTileID, currentCount)
 				}
 			}
 		}
-		
+
 		if(ret == false)
 		{
 			this.rows[xY[1]].hexes[xY[0]].rarity = 0; //Reset rarity
 		}
-
 		return ret;
 	}
 	else
