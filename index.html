@@ -33,12 +33,12 @@
 			<div id = "sizeDiv" style = "display: none; border:1px solid black;">
 				<span>Height: </span> <span id = "height">5</span>/<span id = "heightMax">11</span>
 				<br>
-				<input type = "range" min = "1" max = "11" value = "5" step = "2" oninput="setHeight(this.value)" id = "heightSld"/>
+				<input type = "range" min = "1" max = "11" value = "5" step = "2" onchange="setHeight(this.value)" oninput="setHeight(this.value)" id = "heightSld"/>
 				<br>
 				<br>
 				<span>Width: </span> <span id = "width">5</span>/<span id = "widthMax">11</span>
 				<br>
-				<input type = "range" min = "1" max = "11" value = "5" step = "1" oninput="setWidth(this.value)" id = "widthSld"/>
+				<input type = "range" min = "1" max = "11" value = "5" step = "1" onchange="setWidth(this.value)" oninput="setWidth(this.value)" id = "widthSld"/>
 			</div>
 
 			<br>
@@ -49,7 +49,7 @@
 			<div id = "desertDiv" style = "display: inline-block; border:1px solid black;">
 				<span>Deserts: </span> <span id = "desert">1</span>/<span id = "desertMax">1</span>
 				<br>
-				<input id = "desertSld" type = "range" min = 1 max = 1 value = 1 step = "1" oninput="update()"/>
+				<input id = "desertSld" type = "range" min = 1 max = 1 value = 1 step = "1" onchange="update()" oninput="update()"/>
 			</div>
 
 			<br>
@@ -66,7 +66,7 @@
 			<div id = "seaDiv" style = "display: none; border:1px solid black;">
 				<span>Sea: </span> <span id = "sea">1</span>/<span id = "seaMax">19</span>
 				<br>
-				<input id = "seaSld" type = "range" min = 1 max = 19 value = 1 step = "1" oninput="update()"/>
+				<input id = "seaSld" type = "range" min = 1 max = 19 value = 1 step = "1" onchange="update()" oninput="update()"/>
 
 				<br>
 
@@ -76,7 +76,7 @@
 				<div id = "goldDiv" style = "display: none; border:1px solid black;">
 					<span>Gold: </span> <span id = "gold">0</span>/<span id = "goldMax">0</span>
 					<br>
-					<input id = "goldSld" type = "range" min = 0 max = 0 value = 0 step = "1" oninput="update()"/>
+					<input id = "goldSld" type = "range" min = 0 max = 0 value = 0 step = "1" onchange="update()" oninput="update()"/>
 				</div>
 			</div>
 
@@ -88,13 +88,13 @@
 			<div id = "explorersDiv" style = "display: none; border:1px solid black;">
 				<span>Moons: </span> <span id = "moons">1</span>/<span id = "moonMax">15</span>
 				<br>
-				<input id = "moonSld" type = "range" min = 1 max = 15 value = 1 step = "1" oninput="update()"/>
+				<input id = "moonSld" type = "range" min = 1 max = 15 value = 1 step = "1" onchange="update()" oninput="update()"/>
 
 				<br>
 
 				<span>Suns: </span> <span id = "suns">1</span>/<span id = "sunMax">15</span>
 				<br>
-				<input id = "sunSld" type = "range" min = 1 max = 15 value = 1 step = "1" oninput="update()"/>
+				<input id = "sunSld" type = "range" min = 1 max = 15 value = 1 step = "1" onchange="update()" oninput="update()"/>
 			</div>
 
 			<br>
