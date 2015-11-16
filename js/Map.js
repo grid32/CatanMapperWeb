@@ -50,14 +50,14 @@ function Map(width, height, typeCount)
 			this.typeCount[6] = tempWater;
 		}
 
-		var tileCount = this.getTileCount(), //this.landTiles;
-			each = tileCount / 18,
+		var tileCount = this.getTileCount(); //this.landTiles;
+		tileCount -= (this.typeCount[0] + this.typeCount[6] + this.typeCount[8] + this.typeCount[9] + this.typeCount[10]);
+		var each = tileCount / 18,
 			rarityCount = [each, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each*2, each];
 
 		//Land & rarity
 		this.randomised = this.randomise(0, this.typeCount, rarityCount);
 	}
-	console.log("Randomised? " + this.randomised);
 }
 
 Map.prototype.toString = function()
@@ -101,7 +101,8 @@ Map.prototype.draw = function(ctx)
 					s_sun.draw(ctx, myX + s_resources[0].width/2 - s_sun.width/2, myY + s_resources[0].height/2 - s_sun.width/2);
 				}
 
-				if(currentTile.rarity != 0)
+				var lands = [1, 2, 3, 4, 5, 7];
+				if(lands.indexOf(currentTile.resource) > -1)
 				{
 					s_rarity[currentTile.rarity - 2].draw(ctx, myX + s_resources[0].width/2 - s_rarity[0].width/2, myY + s_resources[0].height/2 - s_rarity[0].height/2);
 				}
@@ -210,7 +211,7 @@ Map.prototype.randomise = function(currentTileID, inResourceCount, inRarityCount
 		randomTypeSet = [0, 1, 2, 3, 4, 5, 7],
 		landSet = [1, 2, 3, 4, 5, 7];
 
-	if(currentHex.resource == -1) //Do hex
+	if(currentHex.rarity == 0 && currentHex.resource == -1) //Do hex
 	{
 		var raritySet = false,
 			randRarity = 0;
@@ -266,6 +267,10 @@ Map.prototype.randomise = function(currentTileID, inResourceCount, inRarityCount
 				}
 			}
 		}
+		if(!raritySet)
+		{
+			currentHex.rarity = 0;
+		}
 		////////////////////////////////////////////////
 
 		//Make list of remaining types
@@ -310,11 +315,32 @@ Map.prototype.randomise = function(currentTileID, inResourceCount, inRarityCount
 					else
 					{
 						//Do next
-						nextDone = this.randomise(currentTileID + 1, this.updateCount(randLand, inResourceCount), this.updateCount(randRarity, inRarityCount));
+						var sub = 2;
+						if(randRarity > 7)
+						{
+							sub = 3;
+						}
+						if(randLand == 0)
+						{
+							nextDone = this.randomise(currentTileID + 1, this.updateCount(randLand, inResourceCount), inRarityCount);
+						}
+						else
+						{
+							nextDone = this.randomise(currentTileID + 1, this.updateCount(randLand, inResourceCount), this.updateCount(randRarity - sub, inRarityCount));
+						}
+						
 					}
 				}
 			}
 		}
+
+		if(!nextDone)
+		{
+			currentHex.resource = -1;
+			currentHex.rarity = 0;
+			this.landTiles--;
+		}
+
 		return nextDone;
 	}
 	else //Skip hex
@@ -338,7 +364,10 @@ Map.prototype.updateCount = function(inIndex, inSet)
 	{
 		tempSet.push(inSet[i]);
 	}
-	tempSet[inIndex]--;
+	if(inIndex >= 0)
+	{
+		tempSet[inIndex]--;
+	}
 	return tempSet;
 }
 
@@ -523,11 +552,11 @@ Map.prototype.checkNeighbourRarity = function(inX, inY, inRarity)
 
 	if(ret == 0)
 	{
-		if(totalRarity/noOfNeighbours > 4.25)
+		if(totalRarity/noOfNeighbours > 5)
 		{
 			ret = -1;
 		}
-		else if(totalRarity/noOfNeighbours < 1.75)
+		else if(totalRarity/noOfNeighbours < 1)
 		{
 			ret = 1;
 		}
